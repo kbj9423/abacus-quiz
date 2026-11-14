@@ -152,9 +152,8 @@ function start(i){
 
 function ask(){
   nums = makeNums(level); startAt = Date.now();
-  out.innerHTML = `<div class="top"><span class="lv ${COLOR[level]}">${LEVELS[level].name}</span><span>${results.length + 1} / ${SOLO}</span><span class="timer">0.0초</span></div>
+  out.innerHTML = `<div class="top"><span class="lv ${COLOR[level]}">${LEVELS[level].name}</span><span>${results.length + 1} / ${SOLO}</span></div>
     ${problem(nums)}${answerForm}<p class="msg"></p>`;
-  out.querySelector("input").focus();
 }
 
 function say(msg){ out.querySelector(".msg").textContent = msg; }
@@ -234,9 +233,8 @@ function onRoom(r){
 const scoreText = () => `나 ${room.score[me]} : ${room.score[other(me)]} ${opp()}`;
 
 function askOnline(){
-  out.innerHTML = `<div class="top"><span class="lv ${COLOR[room.level]}">${room.round}번째 문제</span><span>${scoreText()}</span><span class="timer">${LIMIT}초</span></div>
+  out.innerHTML = `<div class="top"><span class="lv ${COLOR[room.level]}">${room.round}번째 문제</span><span>${scoreText()}</span></div>
     ${problem(room.nums)}${answerForm}<p class="msg"></p><p class="opp">${opp()}이(가) 풀고 있어요.</p>`;
-  out.querySelector("input").focus();
 }
 
 // 답 보내기 (v=null 이면 시간 초과)
@@ -284,15 +282,10 @@ function leave(msg){
   msg ? together(msg) : home();
 }
 
-// 시간 표시. 혼자하기는 걸린 시간, 같이하기는 남은 시간. 시간이 다 되면 틀린 것으로 내고, 상대가 한참 답이 없으면 대결을 끝낸다.
+// 같이하기 시간 확인 (푸는 중에는 시간을 보여 주지 않는다). 시간이 다 되면 틀린 것으로 내고, 상대가 한참 답이 없으면 대결을 끝낸다.
 function tick(){
-  const el = out.querySelector(".timer");
-  if (!el || startAt == null || !mode) return;
-  const ms = Date.now() - startAt;
-  if (!online()) return el.textContent = sec(ms);
-  if (!room || room.status !== "playing" || room.result) return;
-  const left = LIMIT - ms / 1000;
-  el.textContent = `${Math.max(Math.ceil(left), 0)}초`;
+  if (!online() || !room || room.status !== "playing" || room.result) return;
+  const left = LIMIT - (Date.now() - startAt) / 1000;
   if (!sent && !room.ans[me] && left <= 0) submit(null, LIMIT * 1000);
   else if (!room.ans[other(me)] && left <= -8) leave("상대의 응답이 없어 대결을 끝냈어요.");
 }
